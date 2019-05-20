@@ -13,13 +13,10 @@ public class Forecast_weather extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        View v=inflater.inflate(R.layout.forecast_weather, container, false);
-        return v;
+        return inflater.inflate(R.layout.forecast_weather, container, false);
     }
 
     public static Forecast_weather newInstance() {
-        Forecast_weather f =new Forecast_weather();
-        return f;
+        return new Forecast_weather();
     }
 }

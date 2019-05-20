@@ -27,21 +27,24 @@ import java.net.URLConnection;
 public class Find_weather extends Fragment {
 
     private final String URL_CURRENT="https://api.openweathermap.org/data/2.5/weather?q=";
-   // private final String URL_FORECAST="https://api.openweathermap.org/data/2.5/forecast?q=";
+    private final String URL_FORECAST="https://api.openweathermap.org/data/2.5/forecast?q=";
     private final String API= "&appid=7941ae49f715949eac590f931fe15f15";
 
 
     //do wyszukiwania pogody
+
     EditText search_city;
     Button search;
 
     //layout glowny na obecna pogode
+
     TextView city_name;
     TextView temp_text_1;
     ImageView weather_image_1;
     TextView name_day;
 
     // layout z opisem pogody
+
     TextView description_text;
     TextView pressure_text;
 
@@ -51,18 +54,14 @@ public class Find_weather extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-
-            city_name = getActivity().findViewById(R.id.city);
-            temp_text_1 = getActivity().findViewById(R.id.temp_1);
-
-            weather_image_1 = getActivity().findViewById(R.id.weather_image_1);
-
-            search_city = getActivity().findViewById(R.id.search_city);
-            pressure_text = getActivity().findViewById(R.id.pressure);
-            description_text = getActivity().findViewById(R.id.description);
-            name_day = getActivity().findViewById(R.id.name_day);
-            search = getActivity().findViewById(R.id.search_button);
-
+        city_name = getActivity().findViewById(R.id.city);
+        temp_text_1 = getActivity().findViewById(R.id.temp_1);
+        weather_image_1 = getActivity().findViewById(R.id.weather_image_1);
+        search_city = getActivity().findViewById(R.id.search_city);
+        pressure_text = getActivity().findViewById(R.id.pressure);
+        description_text = getActivity().findViewById(R.id.description);
+        name_day = getActivity().findViewById(R.id.name_day);
+        search = getActivity().findViewById(R.id.search_button);
         task = new DownloadTask();
 
         search.setOnClickListener(new View.OnClickListener() {
@@ -84,22 +83,16 @@ public class Find_weather extends Fragment {
 
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.find_weather, container, false);
-        return v;
+        return inflater.inflate(R.layout.find_weather, container, false);
     }
 
     public static Find_weather newInstance() {
-        Find_weather f = new Find_weather();
-        return f;
+        return new Find_weather();
     }
 
 
 
     public class DownloadTask extends AsyncTask<String,Void,String> {
-
-//        private final String API_URL="https://api.openweathermap.org/data/2.5/weather?q=" + search_city.getText().toString() + "&appid=7941ae49f715949eac590f931fe15f15";
-
-///////////////////////////////////////////////////
         @Override
         protected String doInBackground(String... urls)
         {
@@ -113,28 +106,23 @@ public class Find_weather extends Fragment {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
                 String line;
 
-                while ((line = reader.readLine()) != null) // read line by line
+                while ((line = reader.readLine()) != null)
                 {
                     json+=line;
-                    Log.i("text",line);
                 }
                 is.close();
                 return json;
             }
             catch (Exception e)
             {
-                Log.i("doinback","blad");
                 e.printStackTrace();
             }
             return json;
         }
-////////////////////////////////////////////////////
-
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            Log.i("ONPOSTEXECUTE",s);
             try {
                 JSONObject jsonObject = new JSONObject(s);
 
@@ -145,6 +133,7 @@ public class Find_weather extends Fragment {
                 JSONArray arrWeather = new JSONArray(weatherInfo);
                 String message = "";
                 String code_image=null;
+
                 for (int i=0; i < arrWeather.length(); i++) {
 
                     JSONObject jsonPart = arrWeather.getJSONObject(i);
@@ -166,34 +155,7 @@ public class Find_weather extends Fragment {
                 int castint=(int)Math.round(tempdouble);
                 temp=Integer.toString(castint);
 
-/////////////////////////////////////////////////////////////////////////////////////
-                if(code_image.equals("01d")||code_image.equals("01n")) {
-                    weather_image_1.setImageResource(R.drawable.sun);
-                }
-                else if(code_image.equals("02d")||code_image.equals("02n")) {
-                    weather_image_1.setImageResource(R.drawable.cloud);
-                }
-                else if(code_image.equals("03d")||code_image.equals("03n")) {
-                    weather_image_1.setImageResource(R.drawable.cloudy);
-                }
-                else if(code_image.equals("04d")||code_image.equals("04n")) {
-                    weather_image_1.setImageResource(R.drawable.darkclou);
-                }
-                else if(code_image.equals("09d")||code_image.equals("09n")) {
-                    weather_image_1.setImageResource(R.drawable.raining);
-                }
-                else if(code_image.equals("10d")||code_image.equals("10n")) {
-                    weather_image_1.setImageResource(R.drawable.rain);
-                }
-                else if(code_image.equals("11d")||code_image.equals("11n")) {
-                    weather_image_1.setImageResource(R.drawable.lightning);
-                }
-                else if(code_image.equals("13d")||code_image.equals("13n")) {
-                    weather_image_1.setImageResource(R.drawable.snowfall);
-                }
-                else if(code_image.equals("50d")||code_image.equals("50n")) {
-                    weather_image_1.setImageResource(R.drawable.mist);
-                }
+                setImage(code_image);
 
                 if (!message.equals("")) {
                     temp_text_1.setText(temp+"C");
@@ -212,7 +174,37 @@ public class Find_weather extends Fragment {
                 description_text.setText("can't parse JSON");
                 e.printStackTrace();
             }
+        }
 
+        protected void setImage(String code_image)
+        {
+            if(code_image.equals("01d")||code_image.equals("01n")) {
+                weather_image_1.setImageResource(R.drawable.sun);
+            }
+            else if(code_image.equals("02d")||code_image.equals("02n")) {
+                weather_image_1.setImageResource(R.drawable.cloud);
+            }
+            else if(code_image.equals("03d")||code_image.equals("03n")) {
+                weather_image_1.setImageResource(R.drawable.cloudy);
+            }
+            else if(code_image.equals("04d")||code_image.equals("04n")) {
+                weather_image_1.setImageResource(R.drawable.darkclou);
+            }
+            else if(code_image.equals("09d")||code_image.equals("09n")) {
+                weather_image_1.setImageResource(R.drawable.raining);
+            }
+            else if(code_image.equals("10d")||code_image.equals("10n")) {
+                weather_image_1.setImageResource(R.drawable.rain);
+            }
+            else if(code_image.equals("11d")||code_image.equals("11n")) {
+                weather_image_1.setImageResource(R.drawable.lightning);
+            }
+            else if(code_image.equals("13d")||code_image.equals("13n")) {
+                weather_image_1.setImageResource(R.drawable.snowfall);
+            }
+            else if(code_image.equals("50d")||code_image.equals("50n")) {
+                weather_image_1.setImageResource(R.drawable.mist);
+            }
         }
     }
 
