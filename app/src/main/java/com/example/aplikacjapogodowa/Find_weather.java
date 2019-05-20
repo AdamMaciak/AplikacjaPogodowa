@@ -1,8 +1,12 @@
 package com.example.aplikacjapogodowa;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +17,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -23,18 +32,24 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Find_weather extends Fragment {
 
-    private final String URL_CURRENT="https://api.openweathermap.org/data/2.5/weather?q=";
-    private final String URL_FORECAST="https://api.openweathermap.org/data/2.5/forecast?q=";
-    private final String API= "&appid=7941ae49f715949eac590f931fe15f15";
+    private final String URL_CURRENT = "https://api.openweathermap.org/data/2.5/weather?";
+    static final String API = "&appid=7941ae49f715949eac590f931fe15f15";
 
+    private FusedLocationProviderClient fusedLocationClient;
+
+    private String FULL_URL;
+
+    private String cord;
 
     //do wyszukiwania pogody
-
     EditText search_city;
     Button search;
+    Button search_local;
 
     //layout glowny na obecna pogode
 
@@ -50,6 +65,10 @@ public class Find_weather extends Fragment {
 
     DownloadTask task;
 
+    Date now;
+    SimpleDateFormat simpleDateFormat;
+    Toast toast;
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -62,21 +81,38 @@ public class Find_weather extends Fragment {
         description_text = getActivity().findViewById(R.id.description);
         name_day = getActivity().findViewById(R.id.name_day);
         search = getActivity().findViewById(R.id.search_button);
+        search_local = getActivity().findViewById(R.id.geolocal_button);
+
         task = new DownloadTask();
+
+        now = new Date();
+        simpleDateFormat = new SimpleDateFormat("EEEE");
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+
 
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    task = new DownloadTask();
-                    task.execute( URL_CURRENT+ search_city.getText().toString() + API); //7941ae49f715949eac590f931fe15f15
-                    InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(getContext().INPUT_METHOD_SERVICE);
-                    mgr.hideSoftInputFromWindow(search_city.getWindowToken(), 0);
+                FULL_URL=URL_CURRENT +"q=" +search_city.getText().toString() + API;
+                find_weather(FULL_URL);
+            }
+        });
 
+        search_local.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    find_location();
                 } catch (Exception e) {
+                    toast = Toast.makeText(getActivity(), "no permission", Toast.LENGTH_LONG);
+                    toast.show();
                     e.printStackTrace();
-                    pressure_text.setText("error");
                 }
+                FULL_URL=URL_CURRENT+cord+API;
+                find_weather(FULL_URL);
             }
         });
     }
@@ -90,6 +126,39 @@ public class Find_weather extends Fragment {
         return new Find_weather();
     }
 
+    private void find_weather(String API_URL) {
+        try {
+            task = new DownloadTask();
+            //task.execute(URL_CURRENT +"q=" search_city.getText().toString() + API); //7941ae49f715949eac590f931fe15f15
+            task.execute(API_URL);
+            InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(getContext().INPUT_METHOD_SERVICE);
+            mgr.hideSoftInputFromWindow(search_city.getWindowToken(), 0);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            toast = Toast.makeText(getActivity(), "error", Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
+    private void find_location() throws Exception {
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            throw new Exception("no permission");
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location){
+
+                if (location != null) {
+                    cord="lat="+String.format("%.2f",location.getLatitude())+"&lon="+String.format("%.2f",location.getLongitude());
+                    cord=cord.replace(",",".");
+                    Log.i("cord",cord);
+                }
+            }
+        });
+    }
 
 
     public class DownloadTask extends AsyncTask<String,Void,String> {
@@ -131,8 +200,8 @@ public class Find_weather extends Fragment {
 
                 Log.i("Weather content", weatherInfo);
                 JSONArray arrWeather = new JSONArray(weatherInfo);
-                String message = "";
-                String code_image=null;
+                String message ="";
+                String code_image="";
 
                 for (int i=0; i < arrWeather.length(); i++) {
 
@@ -140,7 +209,7 @@ public class Find_weather extends Fragment {
                     String main = jsonPart.getString("main");
                     String description = jsonPart.getString("description");
                     code_image=jsonPart.getString("icon");
-                    Log.i("ikona",code_image);
+
                     if (!main.equals("") && !description.equals("")) {
                         message += main + ": " + description + "\r\n";
                     }
@@ -160,23 +229,21 @@ public class Find_weather extends Fragment {
                 if (!message.equals("")) {
                     temp_text_1.setText(temp+"C");
                     description_text.setText(message);
-                    pressure_text.setText(pressure+"hPa");
+                    pressure_text.setText("Pressure: "+pressure+"hPa");
                     city_name.setText(name);
-
-                } else {
-
-                    description_text.setText("didnt find the weather");
                 }
+
+                name_day.setText(simpleDateFormat.format(now));
 
             } catch (Exception e) {
 
-
-                description_text.setText("can't parse JSON");
+                toast=Toast.makeText(getActivity(),"didnt find the weather",Toast.LENGTH_LONG);
+                toast.show();
                 e.printStackTrace();
             }
         }
 
-        protected void setImage(String code_image)
+        private void setImage(String code_image)
         {
             if(code_image.equals("01d")||code_image.equals("01n")) {
                 weather_image_1.setImageResource(R.drawable.sun);
@@ -188,7 +255,7 @@ public class Find_weather extends Fragment {
                 weather_image_1.setImageResource(R.drawable.cloudy);
             }
             else if(code_image.equals("04d")||code_image.equals("04n")) {
-                weather_image_1.setImageResource(R.drawable.darkclou);
+                weather_image_1.setImageResource(R.drawable.darkcloud);
             }
             else if(code_image.equals("09d")||code_image.equals("09n")) {
                 weather_image_1.setImageResource(R.drawable.raining);
@@ -207,5 +274,4 @@ public class Find_weather extends Fragment {
             }
         }
     }
-
 }

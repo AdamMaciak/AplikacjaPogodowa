@@ -10,8 +10,8 @@
         android:id="@+id/textView"
         android:layout_width="196dp"
         android:layout_height="78dp"
-        android:layout_marginStart="95dp"
-        android:layout_marginTop="186dp"
+        android:layout_marginStart="104dp"
+        android:layout_marginTop="264dp"
         android:text="tu ma byc pogoda na 5 dni"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
