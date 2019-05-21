@@ -27,11 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -163,30 +158,8 @@ public class Find_weather extends Fragment {
 
     public class DownloadTask extends AsyncTask<String,Void,String> {
         @Override
-        protected String doInBackground(String... urls)
-        {
-            URLConnection url;
-            String json="";
-            try
-            {
-                url = new URL(urls[0]).openConnection();
-                InputStream is = url.getInputStream();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                String line;
-
-                while ((line = reader.readLine()) != null)
-                {
-                    json+=line;
-                }
-                is.close();
-                return json;
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            return json;
+        protected String doInBackground(String... urls) {
+            return new Connection_manager().get_json(urls[0]);
         }
 
         @Override
