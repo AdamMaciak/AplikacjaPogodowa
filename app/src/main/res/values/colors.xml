@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
-    <color name="backgroundcolor">#FFFFFF</color>
-    <color name="statusbarcolor">#A9DDF7</color>
+    <color name="colorAccent">#1976D2</color>
+    <color name="cardviewbackgroundcolor">#FFFFFF</color>
+    <color name="statusbarcolor">#7EC0FF</color>
+    <color name="buttoncolor">#FFFFFF</color>
 </resources>
