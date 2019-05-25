@@ -6,4 +6,5 @@
     <color name="cardviewbackgroundcolor">#FFFFFF</color>
     <color name="statusbarcolor">#7EC0FF</color>
     <color name="buttoncolor">#FFFFFF</color>
+    <color name="fontcolor">#000000</color>
 </resources>

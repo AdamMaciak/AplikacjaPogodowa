@@ -20,19 +20,19 @@ public class WeatherCard {
         return Code_image;
     }
 
-    public String getText1() {
+    public String getTemperature() {
         return temperature;
     }
 
-    public String getText2() {
+    public String getData() {
         return data;
     }
 
-    public String getText3() {
+    public String getPressure() {
         return pressure;
     }
 
-    public String getText4() {
+    public String getWind() {
         return wind;
     }
 }

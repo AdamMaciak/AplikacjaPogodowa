@@ -1,4 +1,6 @@
-package com.example.aplikacjapogodowa;
+package com.example.aplikacjapogodowa.parser;
+
+import com.example.aplikacjapogodowa.WeatherData;
 
 import org.json.JSONArray;
 import org.json.JSONException;

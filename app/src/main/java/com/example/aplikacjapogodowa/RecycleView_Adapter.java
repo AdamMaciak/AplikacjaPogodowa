@@ -7,11 +7,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.aplikacjapogodowa.parser.Data_converter;
+
 import java.util.ArrayList;
 
 
 public class RecycleView_Adapter extends RecyclerView.Adapter<RecycleView_Adapter.ViewHolder> {
     private ArrayList<WeatherCard> ListWeather;
+    private Interface_manager interface_manager;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView weather_image;
@@ -32,6 +35,7 @@ public class RecycleView_Adapter extends RecyclerView.Adapter<RecycleView_Adapte
 
     public RecycleView_Adapter(ArrayList<WeatherCard> exampleList) {
         ListWeather = exampleList;
+        interface_manager=new Interface_manager();
     }
 
     @Override
@@ -44,12 +48,13 @@ public class RecycleView_Adapter extends RecyclerView.Adapter<RecycleView_Adapte
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         WeatherCard currentItem = ListWeather.get(position);
-
-        holder.weather_image.setImageResource(R.drawable.mist);
-        holder.temperature.setText(currentItem.getText1()+"\u2103");
-        holder.data.setText(currentItem.getText2());
-        holder.pressure.setText(currentItem.getText3()+"hPa");
-        holder.wind.setText(currentItem.getText4());
+        //TODO
+        //holder.weather_image.setImageResource(R.drawable.mist);
+        interface_manager.setImageView(holder,currentItem.getCode_image());
+        holder.temperature.setText(Data_converter.round_numbers(currentItem.getTemperature())+"\u2103");
+        holder.data.setText(currentItem.getData());
+        holder.pressure.setText(Data_converter.round_numbers(currentItem.getPressure())+"hPa");
+        holder.wind.setText(currentItem.getWind());
     }
 
     @Override

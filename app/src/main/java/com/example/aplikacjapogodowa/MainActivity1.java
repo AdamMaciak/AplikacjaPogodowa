@@ -12,12 +12,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.aplikacjapogodowa.parser.Data_converter;
+import com.example.aplikacjapogodowa.parser.JSONtoWeather;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -25,8 +28,9 @@ import java.util.ArrayList;
 
 public class MainActivity1 extends AppCompatActivity {
 
-    static final String API="&appid=7941ae49f715949eac590f931fe15f15";
+    private final String API="&appid=7941ae49f715949eac590f931fe15f15";
     private final String URL_FORECAST_WEATHER ="https://api.openweathermap.org/data/2.5/forecast?";
+
     private FusedLocationProviderClient fusedLocationClient;
 
     private String cord;
@@ -40,7 +44,13 @@ public class MainActivity1 extends AppCompatActivity {
     private ImageView weather_image;
     private TextView city_name;
     private TextView weather_descripition;
+    private TextView wind_direction;
+    private TextView wind_speed;
+    private TextView humidity;
+    private TextView pressure;
+
     private Interface_manager interface_manager;
+
     private Toast toast;
 
     DownloadTask task;
@@ -55,6 +65,10 @@ public class MainActivity1 extends AppCompatActivity {
         weather_image=findViewById(R.id.weather_image);
         city_name=findViewById(R.id.city_name);
         weather_descripition=findViewById(R.id.weather_description);
+        wind_speed=findViewById(R.id.wind_speed);
+        wind_direction=findViewById(R.id.wind_direction);
+        humidity=findViewById(R.id.humidity);
+        pressure=findViewById(R.id.pressure);
 
         requestpermision();
 
@@ -68,6 +82,8 @@ public class MainActivity1 extends AppCompatActivity {
         search_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputMethodManager mgr = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                mgr.hideSoftInputFromWindow(search_button.getWindowToken(), 0);
                 find_weather(URL_FORECAST_WEATHER+ "q="+find_city.getText() +"&units=metric"+API);
             }
         });
@@ -92,14 +108,22 @@ public class MainActivity1 extends AppCompatActivity {
 
 
             for(int i=1;i<weather.size();i++) {
-                weather_list.add(new WeatherCard(weather.get(i).getCode_icon(), weather.get(i).getTemp(),weather.get(i).getWeather_data(), weather.get(i).getPressure(),weather.get(i).getWind_direction()));
+                weather_list.add(new WeatherCard(weather.get(i).getCode_icon(),
+                        weather.get(i).getTemp(),weather.get(i).getWeather_data(),
+                        weather.get(i).getPressure(),
+                        Data_converter.degreetoname(weather.get(i).getWind_direction())+" "+weather.get(i).getWind_speed()+"km/h"));
             }
 
             try {
                 interface_manager.setTextView(city_name, weather.get(0).getCity_name());
-                interface_manager.setTextView(temperature, weather.get(0).getTemp()+"\u2103");
+                interface_manager.setTextView(temperature, Data_converter.round_numbers(weather.get(0).getTemp())+"\u2103");
                 interface_manager.setImageView(weather_image, weather.get(0).getCode_icon());
                 interface_manager.setTextView(weather_descripition,weather.get(0).getWeather_description());
+                interface_manager.setTextView(pressure,Data_converter.round_numbers(weather.get(0).getPressure())+"hPa");
+                interface_manager.setTextView(wind_direction,Data_converter.degreetoname(weather.get(0).getWind_direction()));
+                interface_manager.setTextView(wind_speed,weather.get(0).getWind_speed()+"km/h");
+                interface_manager.setTextView(humidity,weather.get(0).getHumidity()+"%");
+
             }catch (Exception e)
             {
                 e.printStackTrace();
@@ -111,6 +135,12 @@ public class MainActivity1 extends AppCompatActivity {
 
         }
     }
+
+    //------------------------------------------------------------------------------------------------------//
+
+                                                    //Funkcje//
+
+    //------------------------------------------------------------------------------------------------------//
         private void find_weather(String API_URL) {
             try {
                 task = new DownloadTask();
